@@ -18,7 +18,6 @@ class Renderer {
 
         this.models = {
             slide0: [
-                // example model (diamond) -> should be replaced with actual model
                 {
                     vertices: [
                         CG.Vector3(100, 0, 1),
@@ -54,12 +53,25 @@ class Renderer {
                         CG.Vector3(92, -38, 1),
                         CG.Vector3(98, -20, 1)
                     ],
-                    transform: [ null ],
+                    transform: [null],
                     distance: [0, 0], // distance X, distance Y
                     direction: [-1, -1] // direction X, direction Y
                 }
             ],
-            slide1: [],
+            slide1: [
+                {
+                    vertices: [
+                        CG.Vector3(100, 200, 1),
+                        CG.Vector3(-100, 200, 1),
+                        CG.Vector3(-200, 0, 1),
+                        CG.Vector3(-100, -200, 1),
+                        CG.Vector3(100, -200, 1),
+                        CG.Vector3(200, 0, 1),
+                    ],
+                    transform: [null],
+                    currentTheta: 0
+                }
+            ],
             slide2: [],
             slide3: []
         };
@@ -114,16 +126,16 @@ class Renderer {
         this.prev_time = timestamp;
     }
     
-    //
+    // Switches to a specific transorm case
     updateTransforms(time, delta_time) {
         //console.log(time);
         //console.log(delta_time);
         switch (this.slide_idx) {
             case 0:
-                this.bouncingBallTransforms(time, delta_time)
+                this.bouncingBallTransforms(delta_time, 3);
                 break;
             case 1:
-                
+                this.spinningPolygonTransforms(delta_time, 0.5);
                 break;
             case 2:
                 
@@ -154,20 +166,22 @@ class Renderer {
         }
     }
 
-    bouncingBallTransforms(time, delta_time){
-        // seconds the ball is going in each direction
-        let seconds = 5;
 
+    /*
+    ANNIMATION METHODS
+    */
+    // Completes caluclations and transforms for bouncing ball using delta_time
+    bouncingBallTransforms(delta_time, speed){
         // calcualte distance, direction, and speed for Y
         let distanceY = this.models.slide0[0].distance[1];
         let directionY = this.models.slide0[0].direction[1];
-        let velocityY = directionY * 350 / seconds / 1000;
+        let velocityY = directionY * 350 / speed / 1000;
         let transY = distanceY + (velocityY * delta_time);
 
         // calcualte distance, direction, and speed for X
         let distanceX = this.models.slide0[0].distance[0];
         let directionX = this.models.slide0[0].direction[0];
-        let velocityX = directionX * 350 / seconds / 1000;        
+        let velocityX = directionX * 350 / speed / 1000;        
         let transX = distanceX + (velocityX * delta_time);
 
         // set Y direction if out of bounds
@@ -199,7 +213,20 @@ class Renderer {
         this.models.slide0[0].distance[1] = transY;
         this.models.slide0[0].distance[0] = transX;
     }
+    
+    spinningPolygonTransforms(delta_time, velocity) {
+        // velocity in revlotuions per second
+        let rotateTheta = Math.PI * 2 * velocity / 1000;
+        let currentTheta = this.models.slide1[0].currentTheta + (rotateTheta * delta_time);
+        this.rotate(this.models.slide1[0].vertices, currentTheta, this.models.slide1[0].transform);
+        this.translate(this.models.slide1[0].transform, 300, 300, this.models.slide1[0].transform);
+        this.models.slide1[0].currentTheta = currentTheta;
+    }
 
+    /*
+    TRANSFORM METHDODS
+    */
+    // Translates a model view using X and Y cordinates and updates the inputed world view
     translate(modelView, transX, transY, worldView) {
         let matrix = new Matrix(3, 3);
         CG.mat3x3Translate(matrix, transX, transY);
@@ -209,21 +236,29 @@ class Renderer {
         }
     }
 
-    //
-    drawSlide0() {
-        // TODO: draw bouncing ball (circle that changes direction whenever it hits an edge)
-        
-        // Following lines are example of drawing a single polygon
-        // (this should be removed/edited after you implement the slide)
+    // translates a model view using theta and updates the inputed world view
+    rotate(modelView, theta, worldView) {
+        let matrix = new Matrix(3,3);
+        CG.mat3x3Rotate(matrix, theta);
+        for (let i = 0; i < modelView.length; i++) {
+            let newMatrix = Matrix.multiply([matrix, modelView[i]]);
+            worldView[i] = newMatrix;
+        }
+    }
 
+    /*
+    DRAWING METHODS
+    */
+    // Bouncing ball slide
+    drawSlide0() {
         let teal = [0, 128, 128, 255];
         this.drawConvexPolygon(this.models.slide0[0].transform, teal);
     }
 
     //
     drawSlide1() {
-        // TODO: draw at least 3 polygons that spin about their own centers
-        //   - have each polygon spin at a different speed / direction
+        let teal = [0, 128, 128, 255];
+        this.drawConvexPolygon(this.models.slide1[0].transform, teal);
         
         
     }

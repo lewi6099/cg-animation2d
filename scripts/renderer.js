@@ -1,4 +1,5 @@
 import * as CG from './transforms.js';
+import { Matrix } from "./matrix.js";
 
 class Renderer {
     // canvas:              object ({id: __, width: __, height: __})
@@ -20,12 +21,42 @@ class Renderer {
                 // example model (diamond) -> should be replaced with actual model
                 {
                     vertices: [
-                        CG.Vector3(400, 150, 1),
-                        CG.Vector3(500, 300, 1),
-                        CG.Vector3(400, 450, 1),
-                        CG.Vector3(300, 300, 1)
+                        CG.Vector3(100, 0, 1),
+                        CG.Vector3(98, 20, 1),
+                        CG.Vector3(92, 38, 1),
+                        CG.Vector3(83, 56, 1),
+                        CG.Vector3(71, 71, 1),
+                        CG.Vector3(56, 83, 1),
+                        CG.Vector3(38, 92, 1),
+                        CG.Vector3(20, 98, 1),
+                        CG.Vector3(0, 100, 1),
+                        CG.Vector3(-20, 98, 1),
+                        CG.Vector3(-38, 92, 1),
+                        CG.Vector3(-56, 83, 1),
+                        CG.Vector3(-71, 71, 1),
+                        CG.Vector3(-83, 56, 1),
+                        CG.Vector3(-92, 38, 1),
+                        CG.Vector3(-98, 20, 1),
+                        CG.Vector3(-100, 0, 1),
+                        CG.Vector3(-98, -20, 1),
+                        CG.Vector3(-92, -38, 1),
+                        CG.Vector3(-83, -56, 1),
+                        CG.Vector3(-71, -71, 1),
+                        CG.Vector3(-56, -83, 1),
+                        CG.Vector3(-38, -92, 1),
+                        CG.Vector3(-20, -98, 1),
+                        CG.Vector3(0, -100, 1),
+                        CG.Vector3(20, -98, 1),
+                        CG.Vector3(38, -92, 1),
+                        CG.Vector3(56, -83, 1),
+                        CG.Vector3(71, -71, 1),
+                        CG.Vector3(83, -56, 1),
+                        CG.Vector3(92, -38, 1),
+                        CG.Vector3(98, -20, 1)
                     ],
-                    transform: null
+                    transform: [ null ],
+                    distance: [0, 0], // distance X, distance Y
+                    direction: [-1, -1] // direction X, direction Y
                 }
             ],
             slide1: [],
@@ -82,10 +113,25 @@ class Renderer {
         // Update previous time to current one for next calculation of delta time
         this.prev_time = timestamp;
     }
-
+    
     //
     updateTransforms(time, delta_time) {
-        // TODO: update any transformations needed for animation
+        //console.log(time);
+        //console.log(delta_time);
+        switch (this.slide_idx) {
+            case 0:
+                this.bouncingBallTransforms(time, delta_time)
+                break;
+            case 1:
+                
+                break;
+            case 2:
+                
+                break;
+            case 3:
+                
+                break;
+        }
     }
     
     //
@@ -108,15 +154,70 @@ class Renderer {
         }
     }
 
+    bouncingBallTransforms(time, delta_time){
+        // seconds the ball is going in each direction
+        let seconds = 5;
+
+        // calcualte distance, direction, and speed for Y
+        let distanceY = this.models.slide0[0].distance[1];
+        let directionY = this.models.slide0[0].direction[1];
+        let velocityY = directionY * 350 / seconds / 1000;
+        let transY = distanceY + (velocityY * delta_time);
+
+        // calcualte distance, direction, and speed for X
+        let distanceX = this.models.slide0[0].distance[0];
+        let directionX = this.models.slide0[0].direction[0];
+        let velocityX = directionX * 350 / seconds / 1000;        
+        let transX = distanceX + (velocityX * delta_time);
+
+        // set Y direction if out of bounds
+        if (transY < -350 && directionY == -1) {
+            this.models.slide0[0].direction[1] = 1;
+            velocityY *= -1;
+            transY = distanceY + (velocityY * delta_time);
+        } else if (transY > 50 && directionY == 1) {
+            this.models.slide0[0].direction[1] = -1;
+            velocityY *= -1;
+            transY = distanceY + (velocityY * delta_time);
+        }
+
+        // set X direction if out of bounds
+        if (transX < -300 && directionX == -1) {
+            this.models.slide0[0].direction[0] = 1;
+            velocityX *= -1;
+            transX = distanceX + (velocityX * delta_time);
+        } else if (transX > 300 && directionX == 1) {
+            this.models.slide0[0].direction[0] = -1;
+            velocityX *= -1;
+            transX = distanceX + (velocityX * delta_time);
+        }
+
+        // translate model to world view
+        this.translate(this.models.slide0[0].vertices, 400 + transX, 450 + transY, this.models.slide0[0].transform);
+
+        // update distance traveled
+        this.models.slide0[0].distance[1] = transY;
+        this.models.slide0[0].distance[0] = transX;
+    }
+
+    translate(modelView, transX, transY, worldView) {
+        let matrix = new Matrix(3, 3);
+        CG.mat3x3Translate(matrix, transX, transY);
+        for (let i = 0; i < modelView.length; i++) {
+            let newMatrix = Matrix.multiply([matrix, modelView[i]]);
+            worldView[i] = newMatrix;
+        }
+    }
+
     //
     drawSlide0() {
         // TODO: draw bouncing ball (circle that changes direction whenever it hits an edge)
         
-        
         // Following lines are example of drawing a single polygon
         // (this should be removed/edited after you implement the slide)
+
         let teal = [0, 128, 128, 255];
-        this.drawConvexPolygon(this.models.slide0[0].vertices, teal);
+        this.drawConvexPolygon(this.models.slide0[0].transform, teal);
     }
 
     //

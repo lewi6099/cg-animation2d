@@ -72,7 +72,39 @@ class Renderer {
                     currentTheta: 0
                 }
             ],
-            slide2: [],
+            slide2: [
+                {
+                    vertices: [
+                        CG.Vector3(100, 100, 1),
+                        CG.Vector3(-100, 100, 1),
+                        CG.Vector3(-100, -100, 1),
+                        CG.Vector3(100, -100, 1),
+                    ],
+                    transform: [null],
+                    x_growing: true,
+                    y_growing: true,
+                    x_rate: .001,
+                    y_rate: .001,
+                    stretch_x: 1,
+                    stretch_y: 1,
+                },
+                {
+                    vertices: [
+                        CG.Vector3(100, 100, 1),
+                        CG.Vector3(-100, 100, 1),
+                        CG.Vector3(-100, -100, 1),
+                        CG.Vector3(100, -100, 1),
+                    ],
+                    transform: [null],
+                    x_growing: true,
+                    y_growing: true,
+                    x_rate: .001,
+                    y_rate: .001,
+                    stretch_x: 1,
+                    stretch_y: 1,
+                },
+
+            ],
             slide3: []
         };
     }
@@ -138,7 +170,7 @@ class Renderer {
                 this.spinningPolygonTransforms(delta_time, 0.5);
                 break;
             case 2:
-                
+                this.StretchPolygon(delta_time);
                 break;
             case 3:
                 
@@ -223,6 +255,30 @@ class Renderer {
         this.models.slide1[0].currentTheta = currentTheta;
     }
 
+    StretchPolygon(delta_time) {
+        for (let i = 0; i < this.models.slide2.length; i++) {
+            let stretch_x = this.models.slide2[i].stretch_x;
+            let stretch_y = this.models.slide2[i].stretch_y;
+            this.Stretch(this.models.slide2[i].vertices, stretch_x, stretch_y, this.models.slide2[0].transform);
+            this.translate(this.models.slide2[i].transform, 200, 300, this.models.slide2[0].transform);
+    
+            if (stretch_x > 2) {
+                this.models.slide2[i].x_growing = false;
+            } else if (stretch_x < 0.5) {
+                this.models.slide2[i].x_growing = true;
+            }
+    
+            if (stretch_y > 2) {
+                this.models.slide2[i].y_growing = false;
+            } else if (stretch_y < 0.5) {
+                this.models.slide2[i].y_growing = true;
+            }
+    
+            this.models.slide2[i].stretch_x = stretch_x + (this.models.slide2[i].x_rate * delta_time * (this.models.slide2[i].x_growing - 0.5) * 2);
+            this.models.slide2[i].stretch_y = stretch_y + (this.models.slide2[i].y_rate * delta_time * (this.models.slide2[i].y_growing - 0.5) * 2);
+        }
+    }
+
     /*
     TRANSFORM METHDODS
     */
@@ -246,6 +302,16 @@ class Renderer {
         }
     }
 
+    Stretch(modelView, size_x, size_y, worldView) {
+        let mat = new Matrix(3, 3);
+        CG.mat3x3Scale(mat, size_x, size_y);
+
+        for (let i = 0; i < modelView.length; i++) {
+            let new_mat = Matrix.multiply([mat, modelView[i]]);
+            worldView[i] = new_mat;
+        }
+    }
+
     /*
     DRAWING METHODS
     */
@@ -265,6 +331,12 @@ class Renderer {
 
     //
     drawSlide2() {
+        let purple = [150, 50, 230, 255];
+        let green = [50, 240, 130, 255];
+        this.drawConvexPolygon(this.models.slide2[0].transform, purple);
+        this.drawConvexPolygon(this.models.slide2[1].transform, green);
+
+
         // TODO: draw at least 2 polygons grow and shrink about their own centers
         //   - have each polygon grow / shrink different sizes
         //   - try at least 1 polygon that grows / shrinks non-uniformly in the x and y directions

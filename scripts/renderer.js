@@ -105,7 +105,26 @@ class Renderer {
                 },
 
             ],
-            slide3: []
+            slide3: [
+                {
+                    vertices: [
+                        CG.Vector3(100, 100, 1),
+                        CG.Vector3(-100, 100, 1),
+                        CG.Vector3(-100, -100, 1),
+                        CG.Vector3(100, -100, 1),
+                    ],
+                    transform: [null],
+                    distance: [0, 0], // distance X, distance Y
+                    direction: [-1, -1], // direction X, direction Y
+                    currentTheta: 0,
+                    x_growing: true,
+                    y_growing: true,
+                    x_rate: .001,
+                    y_rate: .001,
+                    stretch_x: 1,
+                    stretch_y: 1,
+                },
+            ]
         };
     }
 
@@ -173,7 +192,13 @@ class Renderer {
                 this.StretchPolygon(delta_time);
                 break;
             case 3:
-                
+                let vert = this.models.slide3[0].vertices;
+                this.bouncingBallTransforms(delta_time, 2);
+                this.models.slide3[0].vertices = this.models.slide3[0].transform;
+                this.spinningPolygonTransforms(delta_time, 0.025);
+                this.models.slide3[0].vertices = this.models.slide3[0].transform;
+                this.StretchPolygon(delta_time);
+                this.models.slide3[0].vertices = vert;
                 break;
         }
     }
@@ -212,29 +237,29 @@ class Renderer {
         let transY = distanceY + (velocityY * delta_time);
 
         // calcualte distance, direction, and speed for X
-        let distanceX = models.distance[0];
-        let directionX = models.direction[0];
+        let distanceX = models[0].distance[0];
+        let directionX = models[0].direction[0];
         let velocityX = directionX * 350 / speed / 1000;        
         let transX = distanceX + (velocityX * delta_time);
 
         // set Y direction if out of bounds
         if (transY < -350 && directionY == -1) {
-            models.direction[1] = 1;
+            models[0].direction[1] = 1;
             velocityY *= -1;
             transY = distanceY + (velocityY * delta_time);
         } else if (transY > 50 && directionY == 1) {
-            models.direction[1] = -1;
+            models[0].direction[1] = -1;
             velocityY *= -1;
             transY = distanceY + (velocityY * delta_time);
         }
 
         // set X direction if out of bounds
         if (transX < -300 && directionX == -1) {
-            models.direction[0] = 1;
+            models[0].direction[0] = 1;
             velocityX *= -1;
             transX = distanceX + (velocityX * delta_time);
         } else if (transX > 300 && directionX == 1) {
-            models.direction[0] = -1;
+            models[0].direction[0] = -1;
             velocityX *= -1;
             transX = distanceX + (velocityX * delta_time);
         }
@@ -343,6 +368,10 @@ class Renderer {
 
     //
     drawSlide3() {
+        let pastel = [119, 242, 152, 255];
+        this.drawConvexPolygon(this.models.slide3[0].transform, pastel);
+
+
         // TODO: get creative!
         //   - animation should involve all three basic transformation types
         //     (translation, scaling, and rotation)

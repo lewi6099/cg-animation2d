@@ -204,81 +204,82 @@ class Renderer {
     */
     // Completes caluclations and transforms for bouncing ball using delta_time
     bouncingBallTransforms(delta_time, speed){
+        let models = Object.values(this.models)[this.slide_idx];
         // calcualte distance, direction, and speed for Y
-        let distanceY = this.models.slide0[0].distance[1];
-        let directionY = this.models.slide0[0].direction[1];
+        let distanceY = models[0].distance[1];
+        let directionY = models[0].direction[1];
         let velocityY = directionY * 350 / speed / 1000;
         let transY = distanceY + (velocityY * delta_time);
 
         // calcualte distance, direction, and speed for X
-        let distanceX = this.models.slide0[0].distance[0];
-        let directionX = this.models.slide0[0].direction[0];
+        let distanceX = models.distance[0];
+        let directionX = models.direction[0];
         let velocityX = directionX * 350 / speed / 1000;        
         let transX = distanceX + (velocityX * delta_time);
 
         // set Y direction if out of bounds
         if (transY < -350 && directionY == -1) {
-            this.models.slide0[0].direction[1] = 1;
+            models.direction[1] = 1;
             velocityY *= -1;
             transY = distanceY + (velocityY * delta_time);
         } else if (transY > 50 && directionY == 1) {
-            this.models.slide0[0].direction[1] = -1;
+            models.direction[1] = -1;
             velocityY *= -1;
             transY = distanceY + (velocityY * delta_time);
         }
 
         // set X direction if out of bounds
         if (transX < -300 && directionX == -1) {
-            this.models.slide0[0].direction[0] = 1;
+            models.direction[0] = 1;
             velocityX *= -1;
             transX = distanceX + (velocityX * delta_time);
         } else if (transX > 300 && directionX == 1) {
-            this.models.slide0[0].direction[0] = -1;
+            models.direction[0] = -1;
             velocityX *= -1;
             transX = distanceX + (velocityX * delta_time);
         }
 
         // translate model to world view
-        this.translate(this.models.slide0[0].vertices, 400 + transX, 450 + transY, this.models.slide0[0].transform);
+        this.translate(models[0].vertices, 400 + transX, 450 + transY, models[0].transform);
 
         // update distance traveled
-        this.models.slide0[0].distance[1] = transY;
-        this.models.slide0[0].distance[0] = transX;
+        models[0].distance[1] = transY;
+        models[0].distance[0] = transX;
     }
     
     spinningPolygonTransforms(delta_time, velocity) {
         // velocity in revlotuions per second
+        let models = Object.values(this.models)[this.slide_idx];
         let rotateTheta = Math.PI * 2 * velocity / 1000;
-        let currentTheta = this.models.slide1[0].currentTheta + (rotateTheta * delta_time);
-        this.rotate(this.models.slide1[0].vertices, currentTheta, this.models.slide1[0].transform);
-        this.translate(this.models.slide1[0].transform, 300, 300, this.models.slide1[0].transform);
-        this.models.slide1[0].currentTheta = currentTheta;
+        let currentTheta = models[0].currentTheta + (rotateTheta * delta_time);
+        this.rotate(models[0].vertices, currentTheta, models[0].transform);
+        this.translate(models[0].transform, 300, 300, models[0].transform);
+        models[0].currentTheta = currentTheta;
     }
 
     StretchPolygon(delta_time) {
         let slide = this.slide_idx;
-        let models = Object.values(this.models);
-        console.log(models);
-        for (let i = 0; i < this.models.slide2.length; i++) {
-            let stretch_x = this.models[slide].stretch_x;
-            let stretch_y = this.models[slide].stretch_y;
-            this.Stretch(this.models[slide].vertices, stretch_x, stretch_y, this.models[slide].transform);
-            this.translate(this.models[slide].transform, (i+1) * 200, 300, this.models[slide].transform);
+        let models = Object.values(this.models)[slide];
+        for (let i = 0; i < models.length; i++) {
+            let stretch_x = models[i].stretch_x;
+            let stretch_y = models[i].stretch_y;
+            this.Stretch(models[i].vertices, stretch_x, stretch_y, models[i].transform);
+            this.translate(models[i].transform, (i+1) * 200, 300, models[i].transform);
     
             if (stretch_x > 2) {
-                this.models[slide].x_growing = false;
+                models[i].x_growing = false;
             } else if (stretch_x < 0.5) {
-                this.models[slide].x_growing = true;
+                models[i].x_growing = true;
             }
     
             if (stretch_y > 2) {
-                this.models[slide].y_growing = false;
+                models[i].y_growing = false;
             } else if (stretch_y < 0.5) {
-                this.models[slide].y_growing = true;
+                models[i].y_growing = true;
             }
     
-            this.models[slide].stretch_x = stretch_x + (this.models[slide].x_rate * delta_time * (this.models[slide].x_growing - 0.5) * 2);
-            this.models[slide].stretch_y = stretch_y + (this.models[slide].y_rate * delta_time * (this.models[slide].y_growing - 0.5) * 2);
+            models[i].stretch_x = stretch_x + (models[i].x_rate * delta_time * (models[i].x_growing - 0.5) * 2);
+            models[i].stretch_y = stretch_y + (models[i].y_rate * delta_time * (models[i].y_growing - 0.5) * 2);
         }
     }
 

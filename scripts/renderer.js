@@ -98,8 +98,8 @@ class Renderer {
                     transform: [null],
                     x_growing: true,
                     y_growing: true,
-                    x_rate: .001,
-                    y_rate: .001,
+                    x_rate: .0005,
+                    y_rate: .0015,
                     stretch_x: 1,
                     stretch_y: 1,
                 },
@@ -256,26 +256,29 @@ class Renderer {
     }
 
     StretchPolygon(delta_time) {
+        let slide = this.slide_idx;
+        let models = Object.values(this.models);
+        console.log(models);
         for (let i = 0; i < this.models.slide2.length; i++) {
-            let stretch_x = this.models.slide2[i].stretch_x;
-            let stretch_y = this.models.slide2[i].stretch_y;
-            this.Stretch(this.models.slide2[i].vertices, stretch_x, stretch_y, this.models.slide2[0].transform);
-            this.translate(this.models.slide2[i].transform, 200, 300, this.models.slide2[0].transform);
+            let stretch_x = this.models[slide].stretch_x;
+            let stretch_y = this.models[slide].stretch_y;
+            this.Stretch(this.models[slide].vertices, stretch_x, stretch_y, this.models[slide].transform);
+            this.translate(this.models[slide].transform, (i+1) * 200, 300, this.models[slide].transform);
     
             if (stretch_x > 2) {
-                this.models.slide2[i].x_growing = false;
+                this.models[slide].x_growing = false;
             } else if (stretch_x < 0.5) {
-                this.models.slide2[i].x_growing = true;
+                this.models[slide].x_growing = true;
             }
     
             if (stretch_y > 2) {
-                this.models.slide2[i].y_growing = false;
+                this.models[slide].y_growing = false;
             } else if (stretch_y < 0.5) {
-                this.models.slide2[i].y_growing = true;
+                this.models[slide].y_growing = true;
             }
     
-            this.models.slide2[i].stretch_x = stretch_x + (this.models.slide2[i].x_rate * delta_time * (this.models.slide2[i].x_growing - 0.5) * 2);
-            this.models.slide2[i].stretch_y = stretch_y + (this.models.slide2[i].y_rate * delta_time * (this.models.slide2[i].y_growing - 0.5) * 2);
+            this.models[slide].stretch_x = stretch_x + (this.models[slide].x_rate * delta_time * (this.models[slide].x_growing - 0.5) * 2);
+            this.models[slide].stretch_y = stretch_y + (this.models[slide].y_rate * delta_time * (this.models[slide].y_growing - 0.5) * 2);
         }
     }
 
@@ -335,13 +338,6 @@ class Renderer {
         let green = [50, 240, 130, 255];
         this.drawConvexPolygon(this.models.slide2[0].transform, purple);
         this.drawConvexPolygon(this.models.slide2[1].transform, green);
-
-
-        // TODO: draw at least 2 polygons grow and shrink about their own centers
-        //   - have each polygon grow / shrink different sizes
-        //   - try at least 1 polygon that grows / shrinks non-uniformly in the x and y directions
-
-
     }
 
     //

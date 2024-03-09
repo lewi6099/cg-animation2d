@@ -120,7 +120,7 @@ class Renderer {
                     x_growing: true,
                     y_growing: true,
                     x_rate: .001,
-                    y_rate: .001,
+                    y_rate: .002,
                     stretch_x: 1,
                     stretch_y: 1,
                 },
@@ -193,11 +193,10 @@ class Renderer {
                 break;
             case 3:
                 let vert = this.models.slide3[0].vertices;
-                this.bouncingBallTransforms(delta_time, 2);
-                this.models.slide3[0].vertices = this.models.slide3[0].transform;
-                this.spinningPolygonTransforms(delta_time, 0.025);
+                this.spinningPolygonTransforms(delta_time, 0.5);
                 this.models.slide3[0].vertices = this.models.slide3[0].transform;
                 this.StretchPolygon(delta_time);
+                this.translate(this.models.slide3[0].transform, 300*Math.sin(time/1000), 50*Math.sin(time/1000), this.models.slide3[0].transform);
                 this.models.slide3[0].vertices = vert;
                 break;
         }
@@ -278,7 +277,6 @@ class Renderer {
         let rotateTheta = Math.PI * 2 * velocity / 1000;
         let currentTheta = models[0].currentTheta + (rotateTheta * delta_time);
         this.rotate(models[0].vertices, currentTheta, models[0].transform);
-        this.translate(models[0].transform, 300, 300, models[0].transform);
         models[0].currentTheta = currentTheta;
     }
 
@@ -289,7 +287,6 @@ class Renderer {
             let stretch_x = models[i].stretch_x;
             let stretch_y = models[i].stretch_y;
             this.Stretch(models[i].vertices, stretch_x, stretch_y, models[i].transform);
-            this.translate(models[i].transform, (i+1) * 200, 300, models[i].transform);
     
             if (stretch_x > 2) {
                 models[i].x_growing = false;
@@ -353,6 +350,7 @@ class Renderer {
     //
     drawSlide1() {
         let teal = [0, 128, 128, 255];
+        this.translate(this.models.slide1[0].transform, 300, 300, this.models.slide1[0].transform);
         this.drawConvexPolygon(this.models.slide1[0].transform, teal);
         
         
@@ -362,6 +360,8 @@ class Renderer {
     drawSlide2() {
         let purple = [150, 50, 230, 255];
         let green = [50, 240, 130, 255];
+        this.translate(this.models.slide2[0].transform, 200, 300, this.models.slide2[0].transform);
+        this.translate(this.models.slide2[1].transform, 500, 300, this.models.slide2[1].transform);
         this.drawConvexPolygon(this.models.slide2[0].transform, purple);
         this.drawConvexPolygon(this.models.slide2[1].transform, green);
     }
@@ -369,14 +369,8 @@ class Renderer {
     //
     drawSlide3() {
         let pastel = [119, 242, 152, 255];
+        this.translate(this.models.slide3[0].transform, 300, 300, this.models.slide3[0].transform);
         this.drawConvexPolygon(this.models.slide3[0].transform, pastel);
-
-
-        // TODO: get creative!
-        //   - animation should involve all three basic transformation types
-        //     (translation, scaling, and rotation)
-        
-        
     }
     
     // vertex_list:  array of object [Matrix(3, 1), Matrix(3, 1), ..., Matrix(3, 1)]

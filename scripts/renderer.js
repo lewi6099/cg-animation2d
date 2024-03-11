@@ -70,6 +70,26 @@ class Renderer {
                     ],
                     transform: [null],
                     currentTheta: 0
+                },
+                {
+                    vertices: [
+                        CG.Vector3(50, 50, 1),
+                        CG.Vector3(-50, 50, 1),
+                        CG.Vector3(-50, -50, 1),
+                        CG.Vector3(50, -50, 1)
+                    ],
+                    transform: [null],
+                    currentTheta: 0
+                },
+                {
+                    vertices: [
+                        CG.Vector3(50, 50, 1),
+                        CG.Vector3(-50, 50, 1),
+                        CG.Vector3(-50, -50, 1),
+                        CG.Vector3(50, -50, 1)
+                    ],
+                    transform: [null],
+                    currentTheta: 0
                 }
             ],
             slide2: [
@@ -186,14 +206,16 @@ class Renderer {
                 this.bouncingBallTransforms(delta_time, 3);
                 break;
             case 1:
-                this.spinningPolygonTransforms(delta_time, 0.5);
+                this.spinningPolygonTransforms(delta_time, 0.5, 0);
+                this.spinningPolygonTransforms(delta_time, -0.2, 1);
+                this.spinningPolygonTransforms(delta_time, 1.5, 2);
                 break;
             case 2:
                 this.StretchPolygon(delta_time);
                 break;
             case 3:
                 let vert = this.models.slide3[0].vertices;
-                this.spinningPolygonTransforms(delta_time, 0.5);
+                this.spinningPolygonTransforms(delta_time, 0.5, 0);
                 this.models.slide3[0].vertices = this.models.slide3[0].transform;
                 this.StretchPolygon(delta_time);
                 this.translate(this.models.slide3[0].transform, 300*Math.sin(time/1000), 50*Math.sin(time/1000), this.models.slide3[0].transform);
@@ -271,13 +293,13 @@ class Renderer {
         models[0].distance[0] = transX;
     }
     
-    spinningPolygonTransforms(delta_time, velocity) {
+    spinningPolygonTransforms(delta_time, velocity, modelIndex) {
         // velocity in revlotuions per second
         let models = Object.values(this.models)[this.slide_idx];
         let rotateTheta = Math.PI * 2 * velocity / 1000;
-        let currentTheta = models[0].currentTheta + (rotateTheta * delta_time);
-        this.rotate(models[0].vertices, currentTheta, models[0].transform);
-        models[0].currentTheta = currentTheta;
+        let currentTheta = models[modelIndex].currentTheta + (rotateTheta * delta_time);
+        this.rotate(models[modelIndex].vertices, currentTheta, models[modelIndex].transform);
+        models[modelIndex].currentTheta = currentTheta;
     }
 
     StretchPolygon(delta_time) {
@@ -350,8 +372,14 @@ class Renderer {
     //
     drawSlide1() {
         let teal = [0, 128, 128, 255];
+        let red = [235, 64, 52, 255];
+        let green = [50, 240, 130, 255];
         this.translate(this.models.slide1[0].transform, 300, 300, this.models.slide1[0].transform);
+        this.translate(this.models.slide1[1].transform, 600, 500, this.models.slide1[1].transform);
+        this.translate(this.models.slide1[2].transform, 600, 200, this.models.slide1[2].transform);
         this.drawConvexPolygon(this.models.slide1[0].transform, teal);
+        this.drawConvexPolygon(this.models.slide1[1].transform, red);
+        this.drawConvexPolygon(this.models.slide1[2].transform, green);
         
         
     }
